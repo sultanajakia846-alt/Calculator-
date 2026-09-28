@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pro Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            background: #0f172a;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        .calculator-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            position: relative;
+        }
+
+        /* Top Bar & History Toggle */
+        .top-bar {
+            padding: 20px 20px 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .app-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #94a3b8;
+            letter-spacing: 1px;
+        }
+
+        .history-btn {
+            background: none;
+            border: none;
+            color: #38bdf8;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* History Panel */
+        .history-panel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            transition: transform 0.3s ease-in-out;
+            transform: translateY(-100%);
+            z-index: 10;
+        }
+
+        .history-panel.active {
+            transform: translateY(0);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 10px;
+        }
+
+        .history-header h3 {
+            color: #f8fafc;
+            font-size: 18px;
+        }
+
+        .clear-history {
+            background: #ef4444;
+            border: none;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .history-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .history-item {
+            background: #1e293b;
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-align: right;
+            cursor: pointer;
+        }
+
+        .history-eq {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .history-ans {
+            color: #38bdf8;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* Display Screen */
+        .display-screen {
+            padding: 10px 30px;
+            text-align: right;
+            word-break: break-all;
+            word-wrap: break-word;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            min-height: 110px;
+        }
+
+        .previous-operand {
+            color: #64748b;
+            font-size: 20px;
+            min-height: 25px;
+        }
+
+        .current-operand {
+            color: #f8fafc;
+            font-size: 48px;
+            font-weight: 400;
+        }
+
+        /* Keypad Layout */
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            padding: 20px;
+            background: #0f172a;
+            border-top-left-radius: 30px;
+            border-top-right-radius: 30px;
+            box-shadow: 0px -10px 25px rgba(0, 0, 0, 0.4);
+            margin-top: auto;
+        }
+
+        button.key {
+            background: #1e293b;
+            border: none;
+            outline: none;
+            padding: 16px 0;
+            border-radius: 20px;
+            font-size: 22px;
+            color: #f8fafc;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        button.key:active {
+            transform: scale(0.95);
+            background: #334155;
+        }
+
+        .key.operator {
+            background: #0284c7;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .key.action {
+            background: #334155;
+            color: #38bdf8;
+            font-weight: 600;
+        }
+
+        .key.equal {
+            background: #10b981;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calculator-container">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <span class="app-title">PRO CALCULATOR</span>
+            <button class="history-btn" onclick="toggleHistory()">History</button>
+        </div>
+
+        <!-- History Dropdown Panel -->
+        <div class="history-panel" id="historyPanel">
+            <div class="history-header">
+                <h3>Calculation History</h3>
+                <button class="clear-history" onclick="clearHistory()">Clear</button>
+            </div>
+            <div class="history-list" id="historyList"></div>
+        </div>
+
+        <!-- Display Area -->
+        <div class="display-screen">
+            <div class="previous-operand" id="previousOperand"></div>
+            <div class="current-operand" id="currentOperand">0</div>
+        </div>
+
+        <!-- Buttons Grid -->
+        <div class="keypad">
+            <button class="key action" onclick="clearAll()">AC</button>
+            <button class="key action" onclick="deleteDigit()">⌫</button>
+            <button class="key action" onclick="appendValue('%')">%</button>
+            <button class="key operator" onclick="appendValue('/')">÷</button>
+
+            <button class="key" onclick="appendValue('7')">7</button>
+            <button class="key" onclick="appendValue('8')">8</button>
+            <button class="key" onclick="appendValue('9')">9</button>
+            <button class="key operator" onclick="appendValue('*')">×</button>
+
+            <button class="key" onclick="appendValue('4')">4</button>
+            <button class="key" onclick="appendValue('5')">5</button>
+            <button class="key" onclick="appendValue('6')">6</button>
+            <button class="key operator" onclick="appendValue('-')">-</button>
+
+            <button class="key" onclick="appendValue('1')">1</button>
+            <button class="key" onclick="appendValue('2')">2</button>
+            <button class="key" onclick="appendValue('3')">3</button>
+            <button class="key operator" onclick="appendValue('+')">+</button>
+
+            <button class="key" onclick="appendValue('00')">00</button>
+            <button class="key" onclick="appendValue('0')">0</button>
+            <button class="key" onclick="appendValue('.')">.</button>
+            <button class="key equal" onclick="compute()">=</button>
+        </div>
+    </div>
+
+    <script>
+        let currentOperandElem = document.getElementById('currentOperand');
+        let previousOperandElem = document.getElementById('previousOperand');
+        let historyPanel = document.getElementById('historyPanel');
+        let historyList = document.getElementById('historyList');
+        
+        let currentInput = '0';
+        let previousInput = '';
+        let historyData = [];
+
+        function updateDisplay() {
+            currentOperandElem.innerText = currentInput;
+            previousOperandElem.innerText = previousInput;
+        }
+
+        function appendValue(value) {
+            if (currentInput === '0' && value !== '.') {
+                currentInput = value;
+            } else {
+                currentInput += value;
+            }
+            updateDisplay();
+        }
+
+        function clearAll() {
+            currentInput = '0';
+            previousInput = '';
+            updateDisplay();
+        }
+
+        function deleteDigit() {
+            if (currentInput.length > 1) {
+                currentInput = currentInput.slice(0, -1);
+            } else {
+                currentInput = '0';
+            }
+            updateDisplay();
+        }
+
+        function compute() {
+            let result;
+            try {
+                let computationString = currentInput.replace(/×/g, '*').replace(/÷/g, '/');
+                result = eval(computationString);
+                
+                if (result === undefined || isNaN(result)) {
+                    throw new Error("Invalid");
+                }
+
+                addHistory(currentInput, result);
+                previousInput = currentInput + ' =';
+                currentInput = String(result);
+            } catch (error) {
+                currentInput = 'Error';
+            }
+            updateDisplay();
+        }
+
+        function toggleHistory() {
+            historyPanel.classList.toggle('active');
+        }
+
+        function addHistory(equation, answer) {
+            historyData.unshift({ eq: equation, ans: answer });
+            renderHistory();
+        }
+
+        function renderHistory() {
+            historyList.innerHTML = '';
+            historyData.forEach(item => {
+                let div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `<div class="history-eq">${item.eq}</div><div class="history-ans">= ${item.ans}</div>`;
+                historyList.appendChild(div);
+            });
+        }
+
+        function clearHistory() {
+            historyData = [];
+            renderHistory();
+        }
+    </script>
+</body>
+                                                                </html>
+                                                                
