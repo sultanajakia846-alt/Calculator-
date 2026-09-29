@@ -1,0 +1,13 @@
+{
+  "background_color": "#390eec",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Pro Calculator",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Calculator",
+  "start_url": "/",
+  "theme_color": "#300aed",
+  "id": "com.jakia.procalculator",
+  "description": "An advanced and professional calculator app for all your mathematical calculations."
+}
