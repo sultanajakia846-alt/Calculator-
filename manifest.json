@@ -1,0 +1,13 @@
+{
+  "background_color": "#131bff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "OmniCalc Pro",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "OmniCalc",
+  "start_url": "/",
+  "theme_color": "#1111e8",
+  "id": "omni-calc-pro",
+  "description": "A modern and fast web calculator app."
+}
